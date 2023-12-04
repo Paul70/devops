@@ -3,6 +3,29 @@
 import argparse
 from build import DevOps
 
+
+class Runner():
+
+    def __init__(self) -> None:
+        self.devops = DevOps()
+        pass
+
+    def action_bootstrap(self, profile = ""):
+        self.devops.bootstrap(profile)
+        pass
+
+    def action_build(self):
+        self.devops.build()
+        pass
+
+
+
+###############################################################################################
+#
+# Run section 
+#
+###############################################################################################
+
 # Command line argument parsing
 # Arguments with '-' or '--': optional
 # Arguments without '-' or '--': mandatory
@@ -16,9 +39,10 @@ config = vars(args)
 print(config)
 
 
-devops = DevOps()
+runner = Runner()
+
 if config["bootstrap"] and not config["profile"]:
-    devops.bootstrap()
+    runner.action_bootstrap()
 elif config["bootstrap"] and config["profile"]:
-    devops.bootstrap(config["profile"])
+    runner.action_build(config["profile"])
 pass

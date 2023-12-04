@@ -1,10 +1,12 @@
 #! /usr/bin/python3
-import sys
+
 import os
 from pathlib import Path
 import subprocess
 import json  
 import argparse
+
+from utility import Utility
 
 
 ###############################################################################################
@@ -104,7 +106,7 @@ class DevOps:
         self.conanInfoDir = self.buildDir + "/conan_info/"
 
     
-        file = self.export(conanGraph_dict, self.conanInfoDir, "info_graph.json")
+        file = Utility.export(conanGraph_dict, self.conanInfoDir, "info_graph.json")
         print("devops.py (PROJECT_NAME_VERSION): Generated conan info graph: "+ file.name)
         file = ""
 
@@ -112,7 +114,7 @@ class DevOps:
         if result.stderr:
             print(result.stderr)
         if result.stdout:
-            file = self.export(result.stdout, self.conanInfoDir, "dependency_graph.html")
+            file = Utility.export(result.stdout, self.conanInfoDir, "dependency_graph.html")
             print("devops.py (PROJECT_NAME_VERSION): Generated conan info graph html: "+ file.name)
         file = ""
         
@@ -146,7 +148,7 @@ class DevOps:
         presets_conan.update(config_dict["cmakeUserPresets"])
 
         # export new CMakeUserPresets.json
-        self.export(presets_conan, os.getcwd()+"/", "CMakeUserPresets.json")
+        Utility.export(presets_conan, os.getcwd()+"/", "CMakeUserPresets.json")
         pass
 
 
@@ -201,15 +203,7 @@ class DevOps:
         return file
     
 
-    def export(self, data, folder, label):
-        Path(folder).mkdir(parents=True, exist_ok=True)
-        file = open(folder+label, "w")
-        if "json" in label:
-            file.write(json.dumps(data, indent=4))
-        else:
-            file.writelines(data)
-        file.close()
-        return file
+
 
 
 
