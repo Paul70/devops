@@ -1,7 +1,7 @@
 #! /usr/bin/python3
 
 import argparse
-from build import DevOps
+from devops import DevOps
 
 
 class Command():
