@@ -5,7 +5,7 @@ import subprocess
 import json
 
 from pathlib import Path
-from .utility import Utility
+from utility import Utility
 
 class DevOps:
 
@@ -37,10 +37,10 @@ class DevOps:
     # fucntion create config, die aus einem conanprofile file ein cmake user presets erstellt
     # oder noch besser, ich erstelle aus einem ProjectUserConfig kit ein conan profile, speichere das
     # dann unter profiles ab und dann kann ich das direkt nutzen
-    def bootstrap(self, project, configProfile = ""):
+    def bootstrap(self, project = None, configProfile = None):
         print("\n======== Setting project configuration ========")
-        print("devops.py (PROJECT_NAME_VERSION): Calling boostrap()")
-        
+        Utility.printMethodInfo("devops.py", project, "Calling boostrap()")
+
         # dictionaries used within this method
         config_dict = {}
         conanGraph_dict = {}
@@ -54,27 +54,27 @@ class DevOps:
         else:
             self.conanProfile = self.createConanProfile()  
             pass
-        print("devops.py (PROJECT_NAME_VERSION): Conan profile generated: " + self.conanProfile)
+        Utility.printMethodInfo("devops.py", project, "Conan profile generated: " + self.conanProfile)
 
 
         file = Path("./CMakeLists.txt.user")
         if file.is_file():
-            print("devops.py (PROJECT_NAME_VERSION): Removing "+file.name+" since it may cause trouble.")
+            Utility.printMethodInfo("devops.py", project, "Removing "+file.name+" since it may cause trouble.")
             subprocess.run(["rm "+file.name], shell = True, capture_output = False, text = False)        
         file = Path("./CMakeUserPresets.json")
         if file.is_file():
-            print("devops.py (PROJECT_NAME_VERSION): Removing "+file.name+" since it may cause trouble.")
+            Utility.printMethodInfo("devops.py", project, "Removing "+file.name+" since it may cause trouble.")
             subprocess.run(["rm "+file.name], shell = True, capture_output = False, text = False)
         file = ""
 
         # first run conan install, write info graph to stdout 
         # and save stdout to file under build_dir/build_type/conan_info/...
-        print("devops.py (PROJECT_NAME_VERSION): Running conan install command")
+        Utility.printMethodInfo("devops.py", project, "Running conan install command.")
         result = subprocess.run(["conan install . -pr "+self.conanProfile+" -f json"], shell = True, capture_output = True, text = True)
         if result.stderr:
             print(result.stderr)
         if not result.stdout:
-            print("devops.py (PROJECT_NAME_VERSION): Error: Conan install, leaving project configuration process.")
+            Utility.printMethodInfo("devops.py", project, "Error: Conan install, leaving project configuration process.")
             return
         
         conanGraph_dict = json.loads(result.stdout)
@@ -84,7 +84,7 @@ class DevOps:
 
     
         file = Utility.export(conanGraph_dict, self.conanInfoDir, "info_graph.json")
-        print("devops.py (PROJECT_NAME_VERSION): Generated conan info graph: "+ file.name)
+        Utility.printMethodInfo("devops.py", project, "Generated conan info graph: "+ file.name)
         file = ""
 
         result = subprocess.run(["conan graph info -f html ."], shell = True, capture_output = True, text = True)
@@ -92,28 +92,28 @@ class DevOps:
             print(result.stderr)
         if result.stdout:
             file = Utility.export(result.stdout, self.conanInfoDir, "dependency_graph.html")
-            print("devops.py (PROJECT_NAME_VERSION): Generated conan info graph html: "+ file.name)
+            Utility.printMethodInfo("devops.py", project, "Generated conan info graph html: "+ file.name)
         file = ""
         
 
         # check if we need cmake and its generator from conan cache
         for i_configPresets in config_dict["cmakeUserPresets"]["configurePresets"]:
-            if not "cmakeExecutable" in i_configPresets: 
-               print("devops.py (PROJECT_NAME_VERSION): Warning: No cmake executable set in "+ configProfile+".")
+            if not "cmakeExecutable" in i_configPresets:
+               Utility.printMethodInfo("devops.py", project, "Warning: No cmake executable set in "+ configProfile+".") 
             elif i_configPresets["cmakeExecutable"] == "conan" or\
                i_configPresets["cmakeExecutable"] == "":
-                print("devops.py (PROJECT_NAME_VERSION): Using conan cache cmake.")
+                Utility.printMethodInfo("devops.py", project, "Using conan cache cmake.") 
 
                 # find cmake binary
                 for key in conanGraph_dict["graph"]["nodes"]:
                     if "cmake/" in conanGraph_dict["graph"]["nodes"][key]["label"]:
                         cmakeBin = conanGraph_dict["graph"]["nodes"][key]["cpp_info"]["root"]["bindirs"][0] + "/cmake"
                         config_dict["cmakeUserPresets"]["configurePresets"][0]["cmakeExecutable"] = cmakeBin
-                        print("devops.py (PROJECT_NAME_VERSION): Found "+ cmakeBin)
+                        Utility.printMethodInfo("devops.py", project, "Found "+ cmakeBin) 
                         break
                 
                 if not cmakeBin:
-                    print("devops.py (PROJECT_NAME_VERSION): Warning: No cmake executable found.")
+                    Utility.printMethodInfo("devops.py", project, "Warning: No cmake executable found.")
             else:
                 continue
 

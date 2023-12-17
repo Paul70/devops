@@ -1,24 +1,27 @@
 #! /usr/bin/python3
 import json
-from pathlib import Path
 import os.path
+from pathlib import Path
+from os.path import expanduser
 
 class Utility:
 
     def loadProfile(project, profile = ""):
         if not profile:
-            profile = "/home/paul/.config/devops/default-config.json"
+            profile = expanduser("~") + "/.config/devops/default-config.json"
         elif os.path.isfile(profile):
             # specified profile is in the project root dir
             pass
-        elif os.path.isfile("/home/paul/.config/devops/"+profile):
-            profile = "/home/paul/.config/devops/"+profile
+        elif os.path.isfile(expanduser("~") + "/.config/devops/" + profile):
+            profile = expanduser("~") + "/.config/devops/" + profile
         else:
-            print("Profile " + profile + " not found")
+            Utility.printMethodInfo("utility.py", project, "Profile " + profile + "not found")
+            return
+        Utility.printMethodInfo("utility.py", project, "Reading profile " + profile)
+        
         with open(profile) as file:
             profile_dict = json.load(file)
         file.close()
-        print("devops.py (" + project + "): Using config: "+ profile)
         return profile_dict
 
 
@@ -31,3 +34,7 @@ class Utility:
             file.writelines(data)
         file.close()
         return file
+    
+    def printMethodInfo(file = None, project = None, text = ""):
+        print(file + " ("+project + "): " + text)
+        pass 
