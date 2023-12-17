@@ -1,36 +1,11 @@
 #! /usr/bin/python3
 
 import os
-from pathlib import Path
 import subprocess
-import json  
-import argparse
+import json
 
-from utility import Utility
-
-
-###############################################################################################
-#
-# Run section 
-#
-###############################################################################################
-
-# Command line argument parsing
-# Arguments with '-' or '--': optional
-# Arguments without '-' or '--': mandatory
-parser = argparse.ArgumentParser(description="",
-                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("--bootstrap", action="store_true", help="Installs all dependencies and writes cmake settings.")
-parser.add_argument("--profile", help="Use a specific configuration setup profile.")
-
-args = parser.parse_args()
-config = vars(args)
-print(config)
-
-#if config["bootstrap"] == True
-
-
-
+from pathlib import Path
+from .utility import Utility
 
 class DevOps:
 
@@ -41,7 +16,18 @@ class DevOps:
         self.conanInfoDir = ""
         self.cmakeUserPresets = ""
         pass
-        
+
+    def checkProfile(self, project, configProfile = ""):
+        print("\n======== checking project settings profile ========")
+        print("devops.py (" + project + "): Calling update()")
+
+        config_dict = Utility.loadProfile(project, configProfile)
+        pass
+
+    def update(self):
+        print("\n======== updating project and dependencies ========")
+        print("devops.py (PROJECT_NAME_VERSION): Calling update()")
+
     def build(self):
         pass
 
@@ -51,25 +37,16 @@ class DevOps:
     # fucntion create config, die aus einem conanprofile file ein cmake user presets erstellt
     # oder noch besser, ich erstelle aus einem ProjectUserConfig kit ein conan profile, speichere das
     # dann unter profiles ab und dann kann ich das direkt nutzen
-    def bootstrap(self, configProfile = ""):
+    def bootstrap(self, project, configProfile = ""):
         print("\n======== Setting project configuration ========")
         print("devops.py (PROJECT_NAME_VERSION): Calling boostrap()")
-
-        # variable used for opening files
-        file = ""
-
+        
         # dictionaries used within this method
         config_dict = {}
         conanGraph_dict = {}
 
-        if not configProfile:
-            configProfile = "/home/paul/.config/devops/default-config.json"
-        print("devops.py (PROJECT_NAME_VERSION): Using config: "+ configProfile)
-
-        with open(configProfile) as file:
-            config_dict = json.load(file)
-        file.close()
-        file = ""
+        # load devops profile
+        config_dict = Utility.loadProfile(project, configProfile)
 
 
         if "conanProfile" in config_dict:
@@ -203,15 +180,6 @@ class DevOps:
         return file
     
 
-
-
-
-
-
-#devops = DevOps()
-#devops.createConanProfile()
-#devops.bootstrap("/home/paul/.config/devops/gcc-131-debug-config.json")
-#devops.build()
 
 
 

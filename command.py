@@ -4,7 +4,7 @@ import argparse
 from build import DevOps
 
 
-class Runner():
+class Command():
 
     def __init__(self) -> None:
         self.devops = DevOps()
@@ -12,10 +12,6 @@ class Runner():
 
     def action_bootstrap(self, profile = ""):
         self.devops.bootstrap(profile)
-        pass
-
-    def action_build(self):
-        self.devops.build()
         pass
 
 
@@ -36,13 +32,11 @@ parser.add_argument("--profile", help="Use a specific configuration setup profil
 
 args = parser.parse_args()
 config = vars(args)
-print(config)
+#print(config)
 
-
-runner = Runner()
-
+runner = Command()
 if config["bootstrap"] and not config["profile"]:
     runner.action_bootstrap()
 elif config["bootstrap"] and config["profile"]:
-    runner.action_build(config["profile"])
+    runner.action_bootstrap(config["profile"])
 pass
