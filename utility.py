@@ -9,6 +9,7 @@ class Utility:
         if not profile:
             profile = "/home/paul/.config/devops/default-config.json"
         elif os.path.isfile(profile):
+            # specified profile is in the project root dir
             pass
         elif os.path.isfile("/home/paul/.config/devops/"+profile):
             profile = "/home/paul/.config/devops/"+profile
@@ -20,7 +21,6 @@ class Utility:
         print("devops.py (" + project + "): Using config: "+ profile)
         return profile_dict
 
-         
 
     def export(data, folder, label):
         Path(folder).mkdir(parents=True, exist_ok=True)
