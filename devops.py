@@ -70,7 +70,7 @@ class DevOps:
         # first run conan install, write info graph to stdout 
         # and save stdout to file under build_dir/build_type/conan_info/...
         Utility.printMethodInfo("devops.py", project, "Running conan install command.")
-        result = subprocess.run(["conan install . -pr "+self.conanProfile+" -f json"], shell = True, capture_output = True, text = True)
+        result = subprocess.run(["conan install . -pr "+self.conanProfile+" -f json --build missing"], shell = True, capture_output = True, text = True)
         if result.stderr:
             print(result.stderr)
         if not result.stdout:

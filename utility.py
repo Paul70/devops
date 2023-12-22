@@ -8,14 +8,14 @@ class Utility:
 
     def loadProfile(project, profile = ""):
         if not profile:
-            profile = expanduser("~") + "/.config/devops/default-config.json"
+            profile = expanduser("~") + "/.config/devops/default-debug-config.json"
         elif os.path.isfile(profile):
             # specified profile is in the project root dir
             pass
         elif os.path.isfile(expanduser("~") + "/.config/devops/" + profile):
             profile = expanduser("~") + "/.config/devops/" + profile
         else:
-            Utility.printMethodInfo("utility.py", project, "Profile " + profile + "not found")
+            Utility.printMethodInfo("utility.py", project, "Profile " + profile + " not found")
             return
         Utility.printMethodInfo("utility.py", project, "Reading profile " + profile)
         
@@ -38,3 +38,7 @@ class Utility:
     def printMethodInfo(file = None, project = None, text = ""):
         print(file + " ("+project + "): " + text)
         pass 
+
+    def printBannerInfo(text = ""):
+        print("======== Devops-Recipe" + text + " ========")
+        pass
