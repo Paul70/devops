@@ -3,7 +3,7 @@ from unittest.mock import mock_open, patch
 import json
 
 # Assuming create_devops_profile is imported from the module where it is defined.
-from devops.config_management.profile import create_devops_profile
+from config_management.profile import create_devops_profile
 
 class TestCreateDevopsProfile(unittest.TestCase):
 

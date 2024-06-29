@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch
 from io import StringIO
 
-from devops.config_management.cli_parser import create_parser
+from config_management.cli_parser import create_parser
 
 class TestCliParser(unittest.TestCase):
 
