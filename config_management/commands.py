@@ -1,8 +1,8 @@
-from .devops_importer import impoert_derived_instance
+from .devops_importer import import_derived_instance
 
 class CliCommand:
     def __init__(self):
-        self.devops_instance = impoert_derived_instance() 
+        self.devops_instance = import_derived_instance() 
         pass
 
     def cli_bootstrap(self):

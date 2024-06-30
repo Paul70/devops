@@ -1,0 +1,42 @@
+{
+    "label": "",
+    "os": "",
+    "cmakeUserPresets": {
+        "configurePresets": [
+            {
+                "name": "",
+                "displayName": "",
+                "description": "",
+                "cmakeExecutable": "",
+                "inherits": "",
+                "cacheVariables": {
+                    "CMAKE_CXX_COMPILER": "",
+                    "CMAKE_CXX_COMPILER_AR": "",
+                    "CMAKE_CXX_COMPILER_RANLIB": "",
+                    "CMAKE_C_COMPILER": "",
+                    "CMAKE_C_COMPILER_AR": "",
+                    "CMAKE_C_COMPILER_RANLIB": ""
+                }
+            }
+        ],
+        "buildPresets": [
+            {
+                "name": "",
+                "configurePreset": "",
+                "parallel_builds": 0
+            }
+        ]
+    },
+    "conanProfile": {
+        "name": "",
+        "include": "",
+        "settings": {
+            "build_target": "",
+            "compiler.version": 0
+        },
+        "conf": {
+            "tools.build:jobs": 0,
+            "tools.build:compiler_executables": ""
+        }
+    }
+}

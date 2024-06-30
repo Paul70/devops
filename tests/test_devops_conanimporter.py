@@ -32,15 +32,15 @@ class TestConanImporter(unittest.TestCase):
         importer = ConanImporter()
 
         # Test import_name_from_conan method
-        name = importer.import_name_from_conan()
+        name = importer.import_conan_name()
         self.assertEqual(name, "mock_name")
 
         # Test import_author_from_conan method
-        author = importer.import_author_from_conan()
+        author = importer.import_conan_author()
         self.assertEqual(author, "mock_author")
 
         # Test import_version_from_conan method
-        version = importer.import_version_from_conan()
+        version = importer.import_conan_version()
         self.assertEqual(version, "mock_version")
 
 if __name__ == '__main__':

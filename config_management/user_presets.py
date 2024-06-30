@@ -1,54 +1,50 @@
 import json
 import os
 
+from .utility import validate_and_handle_dict
+
 class UserPresets:
-    fileName = "/DevopsUserPresets.json"
-    presetsData = None
+    file_name = "/DevopsUserPresets.json"
+    presets_dict = None
+    allowed_key_set = [
+        'settings_build',
+        'settings_compiler',
+        'settings_ide'
+    ] 
 
     def __init__(self):
         try:
             # Specify the path to your JSON file
-            path = os.getcwd() + self.fileName 
+            path = os.getcwd() + self.file_name 
 
             with open(path, 'r') as file:
-                 self.presetsData = json.load(file)
+                 self.presets_dict = json.load(file)
 
-        except FileNotFoundError:
+        except FileNotFoundError as e:
+            print(e)
             return 
-        pass
-
-    def get_author(self):
+        
         try:
-            return self.presetsData["author"]
-        except KeyError:
-            return 
-
-    def get_version(self):
-        try:
-            return self.presetsData["version"]
-        except KeyError:
+            validate_and_handle_dict(self.presets_dict, self.allowed_key_set)
+        except ValueError as e:
+            print(e)
             return
-
-    def get_name(self):
-        try:
-            return self.presetsData["name"]
-        except KeyError:
-            return
+        
     
     def get_ide_settings(self):
         try:
-            return self.presetsData["settings_ide"]
+            return self.presets_dict["settings_ide"]
         except KeyError:
             return
         
     def get_compiler_settings(self):
         try:
-            return self.presetsData["settings_compiler"]
+            return self.presets_dict["settings_compiler"]
         except KeyError:
             return
 
     def get_build_settings(self):
         try:
-            return self.presetsData["settings_build"]
+            return self.presets_dict["settings_build"]
         except KeyError:
             return

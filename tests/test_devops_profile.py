@@ -1,88 +1,83 @@
 import unittest
-from unittest.mock import mock_open, patch
+from unittest.mock import patch, MagicMock
 import json
+import os
 
-# Assuming create_devops_profile is imported from the module where it is defined.
-from config_management.profile import create_devops_profile
-
-class TestCreateDevopsProfile(unittest.TestCase):
-
-    def setUp(self):
-        self.parameter_array = [
-            "devops_profile",
-            "A profile description",
-            {"name": "Ubuntu", "version": "20.04"},
-            {"name": "VSCode", "settings_display_name": "Default"},
-            {"name": "gcc", "version": "10", "major": "10", "minor": "2", "path": "/usr/bin/"},
-            {"directory": "/build", "type": "Release", "jobs": 4}
-        ]
-
-        self.expected_profile = {
-            "label": "devops_profile",
-            "os": "Ubuntu 20.04",
-            "cmakeUserPresets": {
-                "configurePresets": [
-                    {
-                        "name": "VSCode",
-                        "displayName": "VSCode",
-                        "description": "A profile description",
-                        "cmakeExecutable": "conan",
-                        "inherits": "conan-debug",
-                        "cacheVariables": {
-                            "CMAKE_CXX_COMPILER": "/usr/bin/g++",
-                            "CMAKE_CXX_COMPILER_AR": "/usr/bin/gcc-ar",
-                            "CMAKE_CXX_COMPILER_RANLIB": "/usr/bin/gcc-ranlib",
-                            "CMAKE_C_COMPILER": "/usr/bin/gcc",
-                            "CMAKE_C_COMPILER_AR": "/usr/bin/gcc-ar",
-                            "CMAKE_C_COMPILER_RANLIB": "/usr/bin/gcc-ranlib"
-                        }
-                    }
-                ],
-                "buildPresets": [
-                    {
-                        "name": "VSCode",
-                        "configurePreset": "VSCode",
-                        "jobs": 4
-                    }
-                ]
-            },
-            "conanProfile": {
-                "name": "devops_profile",
-                "include": "default",
-                "settings": {
-                    "build_type": "Release",
-                    "compiler.version": "10"
-                },
-                "conf": {
-                    "tools.build:jobs": 4,
-                    "tools.build:compiler_executables": "{'c': '/usr/bin/gcc', 'cpp': '/usr/bin/g++'}"
-                }
-            }
-        }
+from config_management.profile import DevopsProfile, UserPresets, detect_os_info
 
 
-    @patch("builtins.open", new_callable=mock_open)
-    def test_create_devops_profile(self, mock_open):
-        # Call the function with the test data
-        create_devops_profile(self.parameter_array)
 
-        # Check that open was called correctly
-        mock_open.assert_called_once_with("devops_profile.json", 'w')
+class TestDevopsProfile(unittest.TestCase):
+    
+    @patch('config_management.user_presets.open', new_callable=unittest.mock.mock_open, read_data='{"settings_ide": {"name": "VSCode","settings_display_name": "Visual Studio Code"},"settings_compiler":  {"major": 9,"path": "/usr/bin/"},"settings_build": {"target": "x86_64","parallel_builds": 4}}')
+    @patch('config_management.user_presets.UserPresets')
+    @patch('config_management.utility.detect_os_info')
+    @patch('builtins.open', new_callable=unittest.mock.mock_open, read_data='{"cmakeUserPresets": {"configurePresets": {}, "buildPresets": {}}, "conanProfile": {"settings": {}, "conf": {}}}')
+    def test_init_loads_profile_dict(self, mock_open, mock_detect_os_info, MockUserPresets, mock_user_presets_open):
+        # Setup
+        mock_detect_os_info.return_value = {"os_name": "Linux"}
+        mock_user_presets = MockUserPresets.return_value
+        mock_user_presets.get_compiler_settings.return_value = {"path": "/usr/bin/", "major": "9"}
+        mock_user_presets.get_build_settings.return_value = {"parallel_builds": 4, "target": "x86_64"}
+        mock_user_presets.get_ide_settings.return_value = {"name": "VSCode", "settings_display_name": "Visual Studio Code"}
 
-        # Extract the file handle to check its write calls
-        handle = mock_open()
+        # Instantiate the DevopsProfile class
+        devops_profile = DevopsProfile()
 
-        # Concatenate all the write calls to form the full content
-        # Concatenate Write Calls: Since json.dump writes in chunks, the write method is called 
-        # multiple times. We concatenate these calls to reconstruct the complete JSON content.
-        written_content = ''.join(call_args[0][0] for call_args in handle.write.call_args_list)
+        #print("hallo")
+        #print(devops_profile.user_presets_dict.get_compiler_settings())
 
-        # Convert the written JSON string to a dictionary
-        actual_profile = json.loads(written_content)
+        # Assertions for initialization
+        self.assertIsNotNone(devops_profile.user_presets_dict.get_compiler_settings())
+        self.assertIsNotNone(devops_profile.user_presets_dict)
+        #self.assertIsNotNone(devops_profile.profile_dict)
+        #self.assertIn("cmakeUserPresets", devops_profile.profile_dict)
+        #self.assertIn("conanProfile", devops_profile.profile_dict)
 
-        # Assert the profile content matches expected
-        self.assertEqual(actual_profile, self.expected_profile)
 
+
+    @patch('config_management.user_presets.open', new_callable=unittest.mock.mock_open, read_data='{"settings_ide": {"name": "VSCode","settings_display_name": "Visual Studio Code"},"settings_compiler":  {"major": 9,"path": "/usr/bin/"},"settings_build": {"target": "x86_64","parallel_builds": 4}}')
+    @patch('config_management.user_presets.UserPresets')
+    @patch('config_management.utility.detect_os_info')
+    #@patch('config_management.profile.open', new_callable=mock_open)
+    @patch('json.dump')
+    #@patch('builtins.open', new_callable=unittest.mock.mock_open, read_data=)
+    def test_create_devops_profile(self, mock_json_dump, mock_open, mock_detect_os_info, MockUserPresets, mock_user_presets_open):
+        # Setup
+        mock_detect_os_info.return_value = {"os_name": "Linux"}
+        mock_user_presets = MockUserPresets.return_value
+        mock_user_presets.get_compiler_settings.return_value = {"path": "/usr/bin/", "major": "9"}
+        mock_user_presets.get_build_settings.return_value = {"parallel_builds": 4, "target": "x86_64"}
+        mock_user_presets.get_ide_settings.return_value = {"name": "VSCode", "settings_display_name": "Visual Studio Code"}
+
+        # Instantiate the DevopsProfile class
+        devops_profile = DevopsProfile()
+
+        # Call create_devops_profile method
+        self.assertIsNotNone(devops_profile.user_presets_dict.get_compiler_settings())
+
+        devops_profile.create_devops_profile()
+
+        # Check if the profile_dict is updated correctly
+        self.assertEqual(devops_profile.profile_dict["label"], "devops-user-settings-profile")
+        self.assertEqual(devops_profile.profile_dict["os"], "Linux")
+        self.assertEqual(devops_profile.profile_dict["cmakeUserPresets"]["configurePresets"][0]["name"], "VSCode")
+        self.assertEqual(devops_profile.profile_dict["cmakeUserPresets"]["configurePresets"][0]["displayName"], "Visual Studio Code")
+        self.assertEqual(devops_profile.profile_dict["cmakeUserPresets"]["configurePresets"][0]["cmakeExecutable"], "conan")
+        self.assertEqual(devops_profile.profile_dict["cmakeUserPresets"]["configurePresets"][0]["inherits"], "conan-debug")
+        self.assertEqual(devops_profile.profile_dict["cmakeUserPresets"]["configurePresets"][0]["cacheVariables"]["CMAKE_CXX_COMPILER"], "/usr/bin/g++")
+        self.assertEqual(devops_profile.profile_dict["cmakeUserPresets"]["buildPresets"][0]["parallel_builds"], 4)
+        self.assertEqual(devops_profile.profile_dict["conanProfile"]["name"], "devops_conan_profile")
+        self.assertEqual(devops_profile.profile_dict["conanProfile"]["settings"]["compiler.version"], 9)
+        self.assertEqual(devops_profile.profile_dict["conanProfile"]["conf"]["tools.build:jobs"], 4)
+        self.assertEqual(devops_profile.profile_dict["conanProfile"]["conf"]["tools.build:compiler_executables"], "{'c': '/usr/bin/gcc', 'cpp': '/usr/bin/g++'}")
+
+        
+        # Check if the JSON file is written correctly
+        #mock_open().write.assert_called()
+        mock_json_dump.assert_called_once_with(
+            self.devops_profile.profile_dict, mock_open(), indent=4
+        )
 
 if __name__ == '__main__':
     unittest.main()

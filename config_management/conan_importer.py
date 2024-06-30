@@ -9,7 +9,6 @@ class ConanImporter:
         try:
             # Path to your conanfile.py
             file_path = os.getcwd() + self.conanfile
-            print("Step1:",file_path)
 
             # Create a loader object
             loader = ConanFileLoader(None, None)
@@ -17,15 +16,18 @@ class ConanImporter:
             # Load the conanfile
             self.conanData = loader.load_conanfile(file_path, None)
 
-        except FileNotFoundError:
+        except FileNotFoundError as e:
+            print(e)
+            return
+        except Exception as e:
+            print(e)
             return 
-        pass
 
-    def import_name_from_conan(self):
+    def import_conan_name(self): 
         return self.conanData.name
     
-    def import_author_from_conan(self):
+    def import_conan_author(self):
          return self.conanData.author
     
-    def import_version_from_conan(self):
+    def import_conan_version(self):
          return self.conanData.version

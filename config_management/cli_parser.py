@@ -1,8 +1,6 @@
 import argparse
-
 from .commands import CliCommand
 
-    
 def create_parser():
     
     # check if we have to load a user devopsfile.py under the project root

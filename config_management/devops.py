@@ -50,7 +50,7 @@ class DevOpsImpl:
         conanGraph_dict = {}
 
         # load devops profile
-        config_dict = Utility.loadProfile(project, configProfile)
+        #config_dict = Utility.loadProfile(project, configProfile)
 
 
         if "conanProfile" in config_dict:
@@ -61,15 +61,15 @@ class DevOpsImpl:
         Utility.printMethodInfo("devops.py", project, "Conan profile generated: " + self.conanProfile)
 
 
-        file = Path("./CMakeLists.txt.user")
-        if file.is_file():
-            Utility.printMethodInfo("devops.py", project, "Removing "+file.name+" since it may cause trouble.")
-            subprocess.run(["rm "+file.name], shell = True, capture_output = False, text = False)        
-        file = Path("./CMakeUserPresets.json")
-        if file.is_file():
-            Utility.printMethodInfo("devops.py", project, "Removing "+file.name+" since it may cause trouble.")
-            subprocess.run(["rm "+file.name], shell = True, capture_output = False, text = False)
-        file = ""
+        #file = Path("./CMakeLists.txt.user")
+        #if file.is_file():
+        #    Utility.printMethodInfo("devops.py", project, "Removing "+file.name+" since it may cause trouble.")
+        #    subprocess.run(["rm "+file.name], shell = True, capture_output = False, text = False)        
+        #file = Path("./CMakeUserPresets.json")
+        #if file.is_file():
+        #    Utility.printMethodInfo("devops.py", project, "Removing "+file.name+" since it may cause trouble.")
+        #    subprocess.run(["rm "+file.name], shell = True, capture_output = False, text = False)
+        #file = ""
 
         # first run conan install, write info graph to stdout 
         # and save stdout to file under build_dir/build_type/conan_info/...
@@ -81,6 +81,9 @@ class DevOpsImpl:
             Utility.printMethodInfo("devops.py", project, "Error: Conan install, leaving project configuration process.")
             return
         
+
+        # hier ist conan install schon gelaufen, kann dann auch das conanfile importieren
+
         conanGraph_dict = json.loads(result.stdout)
         self.buildType = conanGraph_dict["graph"]["nodes"]["0"]["settings"]["build_type"]
         self.buildDir  = conanGraph_dict["graph"]["nodes"]["0"]["build_folder"]
@@ -91,6 +94,7 @@ class DevOpsImpl:
         Utility.printMethodInfo("devops.py", project, "Generated conan info graph: "+ file.name)
         file = ""
 
+        # das hier ist das einzig wichtige
         result = subprocess.run(["conan graph info -f html ."], shell = True, capture_output = True, text = True)
         if result.stderr:
             print(result.stderr)
@@ -101,6 +105,8 @@ class DevOpsImpl:
         
 
         # check if we need cmake and its generator from conan cache
+        # hier einfach checken ob es conan ist oder nicht
+
         for i_configPresets in config_dict["cmakeUserPresets"]["configurePresets"]:
             if not "cmakeExecutable" in i_configPresets:
                Utility.printMethodInfo("devops.py", project, "Warning: No cmake executable set in "+ configProfile+".") 
@@ -108,7 +114,7 @@ class DevOpsImpl:
                i_configPresets["cmakeExecutable"] == "":
                 Utility.printMethodInfo("devops.py", project, "Using conan cache cmake.") 
 
-                # find cmake binary
+                # find cmake binary das hier ist relevant
                 for key in conanGraph_dict["graph"]["nodes"]:
                     if "cmake/" in conanGraph_dict["graph"]["nodes"][key]["label"]:
                         cmakeBin = conanGraph_dict["graph"]["nodes"][key]["cpp_info"]["root"]["bindirs"][0] + "/cmake"

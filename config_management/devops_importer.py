@@ -3,7 +3,7 @@ import inspect
 import os
 
 
-def impoert_derived_instance():
+def import_derived_instance():
     devops_file = "/devopsfile.py"
     devops_file_name = "devopsfile"
     devops_file_path = os.getcwd() + devops_file
@@ -14,8 +14,6 @@ def impoert_derived_instance():
         spec = importlib.util.spec_from_file_location(devops_file_name, devops_file_path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        
-        print("hier")
 
         # Get the base class reference
         base_class = getattr(module, devops_base_class_name)
@@ -28,9 +26,7 @@ def impoert_derived_instance():
                 break
         
         if devops_derived_class:
-            # Instantiate the derived class
-            #instance = derived_class("Alice")
-            print("sdfadg")
+            # Instantiate the derived class by calling the constructor.
             instance = devops_derived_class()
             #print(f"Class '{devops_derived_class.__name__}' instantiated with name: {instance.name}")
             print(f"Class '{devops_derived_class.__name__}' instantiated with name:")
