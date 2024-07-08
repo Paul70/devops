@@ -31,7 +31,10 @@
         "name": "",
         "include": "",
         "settings": {
-            "build_target": "",
+            "build_type": "",
+            "compiler": "",
+            "compiler.cppstd": "",
+            "compiler.libcxx": "",
             "compiler.version": 0
         },
         "conf": {

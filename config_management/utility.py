@@ -2,6 +2,7 @@
 import json
 import os.path
 import platform
+import sys
 from pathlib import Path
 from os.path import expanduser
 
@@ -62,18 +63,19 @@ def detect_os_info():
 
 ###################################################################################################
 
-"""
-Remove a file at the specified path.
-
-Args:
-    file_path (str): The path to the file to be deleted.
-
-Raises:
-    FileNotFoundError: If the file does not exist.
-    PermissionError: If the program does not have permission to delete the file.
-    Exception: If any other error occurs during file deletion.
-"""
 def remove_file(file_path):
+    """
+    Remove a file at the specified path.
+
+    Args:
+        file_path (str): The path to the file to be deleted.
+
+    Raises:
+        FileNotFoundError: If the file does not exist.
+        PermissionError: If the program does not have permission to delete the file.
+        Exception: If any other error occurs during file deletion.
+    """
+
     try:
         os.remove(file_path)
         print(f"File {file_path} has been deleted successfully.")
@@ -87,46 +89,52 @@ def remove_file(file_path):
 
 ###################################################################################################
 
-
-
-
-
-
-class Utility:
-
-    def loadProfile(project, profile = ""):
-        if not profile:
-            profile = expanduser("~") + "/.config/devops/default-debug-config.json"
-        elif os.path.isfile(profile):
-            # specified profile is in the project root dir
-            pass
-        elif os.path.isfile(expanduser("~") + "/.config/devops/" + profile):
-            profile = expanduser("~") + "/.config/devops/" + profile
-        else:
-            Utility.printMethodInfo("utility.py", project, "Profile " + profile + " not found")
-            return
-        Utility.printMethodInfo("utility.py", project, "Reading profile " + profile)
-        
-        with open(profile) as file:
-            profile_dict = json.load(file)
-        file.close()
-        return profile_dict
-
-
-    def export(data, folder, label):
-        Path(folder).mkdir(parents=True, exist_ok=True)
-        file = open(folder+label, "w")
-        if "json" in label:
-            file.write(json.dumps(data, indent=4))
-        else:
-            file.writelines(data)
-        file.close()
-        return file
+def load_json_file(file_path):
+    """
+    Load a JSON file and handle exceptions.
     
-    def printMethodInfo(file = None, project = None, text = ""):
-        print(file + " ("+project + "): " + text)
-        pass 
+    Parameters:
+    file_path (str): The path to the JSON file.
+    
+    Returns:
+    dict: The loaded JSON data if successful, otherwise None.
+    """
+    try:
+        with open(file_path, 'r') as file:
+            data = json.load(file)
+        print(f"JSON file {file_path} loaded successfully.")
+        return data
+    except FileNotFoundError:
+        sys.exit(f"Error: The file '{file_path}' was not found.")
+    except json.JSONDecodeError:
+        sys.exit(f"Error: The file '{file_path}' is not a valid JSON file.")
+    except Exception as e:
+        sys.exit(f"An unexpected error occurred: {e}")
+    return None
 
-    def printBannerInfo(text = ""):
-        print("======== Devops-Recipe" + text + " ========")
-        pass
+###################################################################################################
+
+def write_dict_to_json(data, filename):
+    """
+    Write a Python dictionary to a JSON file with error handling.
+    Methods creates non existing folders.
+    
+    Parameters:
+    data (dict): The dictionary to be written to JSON.
+    filename (str): The filename/path to write the JSON data.
+    
+    Returns:
+    bool: True if successfully wrote the JSON data, False otherwise.
+    """
+    try:
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, 'w') as file:
+            json.dump(data, file, indent=4)
+        print(f"Successfully wrote JSON data to '{filename}'")
+        return True
+    except IOError as e:
+        sys.exit(f"Error: Could not write to file '{filename}': {e}")
+    except Exception as e:
+        sys.exit(f"Error: Unexpected error occurred: {e}")
+
+

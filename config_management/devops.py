@@ -53,12 +53,12 @@ class DevOpsImpl:
         #config_dict = Utility.loadProfile(project, configProfile)
 
 
-        if "conanProfile" in config_dict:
-            self.conanProfile = self.createConanProfile(config_dict["conanProfile"])
-        else:
-            self.conanProfile = self.createConanProfile()  
-            pass
-        Utility.printMethodInfo("devops.py", project, "Conan profile generated: " + self.conanProfile)
+        #if "conanProfile" in config_dict:
+        #    self.conanProfile = self.createConanProfile(config_dict["conanProfile"])
+        #else:
+        #    self.conanProfile = self.createConanProfile()  
+        #    pass
+        #Utility.printMethodInfo("devops.py", project, "Conan profile generated: " + self.conanProfile)
 
 
         #file = Path("./CMakeLists.txt.user")
@@ -139,56 +139,6 @@ class DevOpsImpl:
         pass
 
 
-    # Get a conan profile based on the default conan profile and the settings in
-    # specified ProjectUserConig.json file which is located under: 
-    #   ~/.config/devops/
-    #
-    # conanprofile will be located under:
-    #   ~/.conan2/profiles/
-    #
-    # If no default conanprofile already exists, one will be generated with conan profile command.
-    #
-    # input: values: dictionary of conanprofile settings
-    # output: of path created conanprofile
-    # 
-    def createConanProfile(self, values = {}):
-        
-        if not "include" in values or values["include"] == "":
-            print("No include conanprofile set, using the system default one:\n")
-            file = Path("/home/paul/.conan2/profiles/default")
-            if not file.is_file():
-                result = subprocess.run(["conan profile detect --force"], shell = True, capture_output = True, text = True)
-                if result.stderr:
-                    print(result.stderr)
-                    return False
-                values["include"] = file
-                
-
-        # create conanprofile file
-        file = "/home/paul/.conan2/profiles/" + values["name"]
-        conanporfile = open(file, "w")
-
-        # write include section
-        include = "include("+values["include"]+")\n"
-        conanporfile.writelines(include+"\n")
-
-        # write settings section
-        if "settings" in values:
-            settings = "[settings]\n"
-            for key in values["settings"]:
-                settings += key+"="+str(values["settings"][key])+"\n"
-            conanporfile.writelines(settings+"\n")
-        
-        # write conf section
-        if "conf" in values:
-            config = "[conf]\n"
-            for key in values["conf"]:
-                config += key+"="+str(values["conf"][key])+"\n"
-            conanporfile.writelines(config+"\n")
-
-        conanporfile.close()
-        return file
-    
 
 
 
