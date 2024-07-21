@@ -23,10 +23,12 @@ class DevopsFile():
         #self.conanImport = ConanImporter() # hier liegt der Hase im Pfeffer
         pass
 
+
     def get_devops_profile(self, cmake_bin = None):
         profile = DevopsProfile()
         profile.create_devops_profile(cmake_bin)
         return profile
+    
 
     def create_conan_profile(self):
         # hier noch das default conan profile machen
@@ -82,6 +84,7 @@ class DevopsFile():
         write_dict_to_json(conan_info_graph_dict, self.conan_info_dir + "info_graph.json")
         pass
 
+
     def create_cmake_user_presets(self):
         cmake_bin = self.get_cmake_bin_from_conan_graph()
         devops_profile = self.get_devops_profile(cmake_bin)
@@ -95,13 +98,7 @@ class DevopsFile():
         print("hallo")
         write_dict_to_json(cmake_user_presets_conan, self.project_root + "/CMakeUserPresets.json")
         pass
-
-
-        #conan_info_graph_dict["cmakeUserPresets"]["configurePresets"][0]["cmakeExecutable"] = cmakeBin
-        #cmake_user_presets = open(file, "w")
-        #cmake_user_presets.writelines(key+"="+str(value)+"\n")
         
-
 
     def get_cmake_bin_from_conan_graph(self):
         conan_info_graph_dict = load_json_file(self.conan_info_dir + "info_graph.json")

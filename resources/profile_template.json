@@ -23,7 +23,7 @@
             {
                 "name": "",
                 "configurePreset": "",
-                "parallel_builds": 0
+                "jobs": 0
             }
         ]
     },

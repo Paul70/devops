@@ -1,7 +1,14 @@
-import json
 import os
+import sys
 
-from .utility import validate_and_handle_dict
+from .utility import load_json_file_to_dict, validate_and_handle_dict
+
+
+"""
+    Hint: Top level porject path using this devops as managment tool is
+    given via 
+"""
+
 
 class UserPresets:
     file_name = "/DevopsUserPresets.json"
@@ -13,38 +20,24 @@ class UserPresets:
     ] 
 
     def __init__(self):
-        try:
-            # Specify the path to your JSON file
-            path = os.getcwd() + self.file_name 
-
-            with open(path, 'r') as file:
-                 self.presets_dict = json.load(file)
-
-        except FileNotFoundError as e:
-            print(e)
-            return 
-        
-        try:
-            validate_and_handle_dict(self.presets_dict, self.allowed_key_set)
-        except ValueError as e:
-            print(e)
-            return
+        self.presets_dict = load_json_file_to_dict(os.getcwd() + self.file_name)
+        validate_and_handle_dict(self.presets_dict, self.allowed_key_set)
         
     
     def get_ide_settings(self):
         try:
             return self.presets_dict["settings_ide"]
-        except KeyError:
-            return
+        except KeyError as e:
+            sys.exit(f"{os.getcwd() + self.file_name}: {e}")
         
     def get_compiler_settings(self):
         try:
             return self.presets_dict["settings_compiler"]
-        except KeyError:
-            return
+        except KeyError as e:
+            sys.exit(f"{os.getcwd() + self.file_name}: {e}")
 
     def get_build_settings(self):
         try:
             return self.presets_dict["settings_build"]
-        except KeyError:
-            return
+        except KeyError as e:
+            sys.exit(f"{os.getcwd() + self.file_name}: {e}")

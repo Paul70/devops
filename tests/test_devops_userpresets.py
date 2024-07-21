@@ -37,15 +37,6 @@ class TestUserPresets(unittest.TestCase):
         self.assertEqual(presets.presets_dict, self.mock_json_data)
     
     @patch('os.getcwd', return_value='/mock/path')
-    @patch('builtins.open', side_effect=FileNotFoundError)
-    def test_init_file_not_found(self, mock_file, mock_getcwd):
-        # Instantiate UserPresets
-        presets = UserPresets()
-
-        # Check if the presetsData is None due to FileNotFoundError
-        self.assertIsNone(presets.presets_dict)
-    
-    @patch('os.getcwd', return_value='/mock/path')
     @patch('builtins.open', new_callable=mock_open, read_data=json.dumps({
         "settings_ide": {"theme": "dark", "font_size": 14},
         "settings_compiler": {"optimization": "O2", "warnings": "all"},
@@ -87,35 +78,26 @@ class TestUserPresets(unittest.TestCase):
         build_settings = presets.get_build_settings()
         self.assertEqual(build_settings, self.mock_json_data["settings_build"])
 
-    @patch('os.getcwd', return_value='/mock/path')
-    @patch('builtins.open', new_callable=mock_open, read_data=json.dumps({}))
-    def test_get_ide_settings_key_error(self, mock_file, mock_getcwd):
-        # Instantiate UserPresets
-        presets = UserPresets()
 
-        # Test get_ide_settings method when key is not present
-        ide_settings = presets.get_ide_settings()
-        self.assertIsNone(ide_settings)
+    # @patch('os.getcwd', return_value='/mock/path')
+    # @patch('builtins.open', new_callable=mock_open, read_data=json.dumps({}))
+    # def test_get_compiler_settings_key_error(self, mock_file, mock_getcwd):
+    #     # Instantiate UserPresets
+    #     presets = UserPresets()
 
-    @patch('os.getcwd', return_value='/mock/path')
-    @patch('builtins.open', new_callable=mock_open, read_data=json.dumps({}))
-    def test_get_compiler_settings_key_error(self, mock_file, mock_getcwd):
-        # Instantiate UserPresets
-        presets = UserPresets()
+    #     # Test get_compiler_settings method when key is not present
+    #     compiler_settings = presets.get_compiler_settings()
+    #     self.assertIsNone(compiler_settings)
 
-        # Test get_compiler_settings method when key is not present
-        compiler_settings = presets.get_compiler_settings()
-        self.assertIsNone(compiler_settings)
+    # @patch('os.getcwd', return_value='/mock/path')
+    # @patch('builtins.open', new_callable=mock_open, read_data=json.dumps({}))
+    # def test_get_build_settings_key_error(self, mock_file, mock_getcwd):
+    #     # Instantiate UserPresets
+    #     presets = UserPresets()
 
-    @patch('os.getcwd', return_value='/mock/path')
-    @patch('builtins.open', new_callable=mock_open, read_data=json.dumps({}))
-    def test_get_build_settings_key_error(self, mock_file, mock_getcwd):
-        # Instantiate UserPresets
-        presets = UserPresets()
-
-        # Test get_build_settings method when key is not present
-        build_settings = presets.get_build_settings()
-        self.assertIsNone(build_settings)
+    #     # Test get_build_settings method when key is not present
+    #     build_settings = presets.get_build_settings()
+    #     self.assertIsNone(build_settings)
 
 # Run the tests
 if __name__ == '__main__':

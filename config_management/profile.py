@@ -3,7 +3,7 @@ import json
 import os
 
 from .user_presets import UserPresets
-from .utility import detect_os_info
+from .utility import load_json_file_to_dict, detect_os_info
 
 # create the devops profile needed to create the conan profile
 
@@ -13,24 +13,7 @@ class DevopsProfile:
 
     def __init__(self):
         self.user_presets_dict = UserPresets() 
-        
 
-    def __load_profile__(self,input_file):
-        try:
-            with open(input_file, 'r') as file:
-                 self.profile_dict = json.load(file)
-
-        except FileNotFoundError as e:
-            print(e)
-            return 
-        except Exception as e:
-            print(e)
-            return 
-        pass
-        
-
-    def print_banner(self):
-        pass
 
     def create_devops_profile(self, cmake_bin_path = None):
         current_script_path = os.path.abspath(__file__)
@@ -38,7 +21,7 @@ class DevopsProfile:
         parent_directory = os.path.abspath(os.path.join(current_directory, os.pardir))
         profile_template = parent_directory + "/resources/profile_template.json"
         
-        self.__load_profile__(profile_template)
+        self.profile_dict = load_json_file_to_dict(profile_template)
 
         settings_compiler = self.user_presets_dict.get_compiler_settings()
         settings_build = self.user_presets_dict.get_build_settings()
@@ -69,7 +52,7 @@ class DevopsProfile:
         # cmake user presets section - build presets
         self.profile_dict["cmakeUserPresets"]["buildPresets"][0]["name"] = settings_ide["name"]
         self.profile_dict["cmakeUserPresets"]["buildPresets"][0]["configurePreset"] = settings_ide["name"]
-        self.profile_dict["cmakeUserPresets"]["buildPresets"][0]["parallel_builds"] = settings_build["parallel_builds"]
+        self.profile_dict["cmakeUserPresets"]["buildPresets"][0]["jobs"] = settings_build["parallel_builds"]
 
         # conan profile section
         self.profile_dict["conanProfile"]["name"] = "devops_conan_profile"
@@ -86,33 +69,39 @@ class DevopsProfile:
             json.dump(self.profile_dict, json_file, indent=4)
         pass
 
+
     def get_conan_profile_name(self):
         file = os.getcwd() + "/devopsprofile.json"
-        self.__load_profile__(file)
+        self.profile_dict = load_json_file_to_dict(file)
         return self.profile_dict["conanProfile"]["name"]
+    
     
     def get_conan_profile_include(self):
         file = os.getcwd() + "/devopsprofile.json"
-        self.__load_profile__(file)
+        self.profile_dict = load_json_file_to_dict(file)
         return self.profile_dict["conanProfile"]["include"]
+
 
     def get_conan_profile_settings(self):
         file = os.getcwd() + "/devopsprofile.json"
-        self.__load_profile__(file)
+        self.profile_dict = load_json_file_to_dict(file)
         return self.profile_dict["conanProfile"]["settings"]
-    
+
+
     def get_conan_profile_conf(self):
         file = os.getcwd() + "/devopsprofile.json"
-        self.__load_profile__(file)
+        self.profile_dict = load_json_file_to_dict(file)
         return self.profile_dict["conanProfile"]["conf"]
-    
+
+
     def get_cmake(self):
         file = os.getcwd() + "/devopsprofile.json"
-        self.__load_profile__(file)
+        self.profile_dict = load_json_file_to_dict(file)
         return self.profile_dict["cmakeUserPresets"]["configurePresets"][0]["cmakeExecutable"]    
+
 
     def get_cmake_user_presets(self):
         file = os.getcwd() + "/devopsprofile.json"
-        self.__load_profile__(file)
+        self.profile_dict = load_json_file_to_dict(file)
         return self.profile_dict["cmakeUserPresets"]
 

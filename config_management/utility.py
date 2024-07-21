@@ -7,47 +7,47 @@ from pathlib import Path
 from os.path import expanduser
 
 
-"""
-Validates that a dictionary only contains a defined set of keys.
-
-:param input_dict: The dictionary to validate.
-:param allowed_keys: A set of allowed keys.
-:return: True if the dictionary only contains allowed keys, False otherwise.
-"""
 def validate_dict_key(input_dict, allowed_keys):
-        return set(input_dict.keys()).issubset(allowed_keys)
+    """
+        Validates that a dictionary only contains a defined set of keys.
+
+        :param input_dict: The dictionary to validate.
+        :param allowed_keys: A set of allowed keys.
+        :return: True if the dictionary only contains allowed keys, False otherwise.
+    """
+    return set(input_dict.keys()).issubset(allowed_keys)
 
 ###################################################################################################
 
 
-"""
-Validates that a dictionary only contains a defined set of keys.
-In case of an allowed key, a "ValueError" exception is thrown.
-
-:param input_dict: The dictionary to validate.
-:param allowed_keys: A set of allowed keys.
-:return: True if the dictionary only contains allowed keys, throw exception otherwise.
-"""
 def validate_and_handle_dict(input_dict, allowed_keys):
-        if not validate_dict_key(input_dict, allowed_keys):
-            raise ValueError(f"Invalid keys found. Allowed keys are: {allowed_keys}")
+    """
+        Validates that a dictionary only contains a defined set of keys.
+        In case of an allowed key, a "ValueError" exception is thrown.
+
+        :param input_dict: The dictionary to validate.
+        :param allowed_keys: A set of allowed keys.
+        :return: True if the dictionary only contains allowed keys, throw exception otherwise.
+    """
+    if not validate_dict_key(input_dict, allowed_keys):
+        sys.exit(f"Invalid keys found in DevopsUserPresets.json. Allowed keys are: {allowed_keys}")
 
 ###################################################################################################
 
 
-"""
-    Detects the operating system name, version, and release.
-
-    This function uses the platform module to retrieve information
-    about the operating system on which the Python script is running.
-
-    Returns:
-        dict: A dictionary containing:
-            - os_name (str): The name of the operating system (e.g., 'Windows', 'Darwin', 'Linux').
-            - os_release (str): The release version of the operating system.
-            - os_version (str): The version of the operating system.
-"""
 def detect_os_info():
+    """
+        Detects the operating system name, version, and release.
+
+        This function uses the platform module to retrieve information
+        about the operating system on which the Python script is running.
+
+        Returns:
+            dict: A dictionary containing:
+                - os_name (str): The name of the operating system (e.g., 'Windows', 'Darwin', 'Linux').
+                - os_release (str): The release version of the operating system.
+                - os_version (str): The version of the operating system.
+    """
     os_name = platform.system()
 
     # Get the operating system release and version
@@ -81,36 +81,61 @@ def remove_file(file_path):
         print(f"File {file_path} has been deleted successfully.")
     except FileNotFoundError:
         print(f"File {file_path} not found.")
-    except PermissionError:
-        print(f"Permission denied: {file_path}.")
+    except PermissionError as e:
+        print(f"Permission denied: {file_path}: : {e}")
     except Exception as e:
         print(f"Error occurred while deleting file {file_path}: {e}")
     pass
 
 ###################################################################################################
 
-def load_json_file(file_path):
+def load_json_file_to_dict(file_path):
     """
-    Load a JSON file and handle exceptions.
+    Load a JSON file into a pyhton dictionary and handle exceptions.
     
     Parameters:
     file_path (str): The path to the JSON file.
     
     Returns:
-    dict: The loaded JSON data if successful, otherwise None.
+    dict: The loaded JSON data if successful, 
+    otherwise system exit.
     """
     try:
         with open(file_path, 'r') as file:
             data = json.load(file)
         print(f"JSON file {file_path} loaded successfully.")
         return data
-    except FileNotFoundError:
-        sys.exit(f"Error: The file '{file_path}' was not found.")
-    except json.JSONDecodeError:
-        sys.exit(f"Error: The file '{file_path}' is not a valid JSON file.")
+    except FileNotFoundError as e:
+        sys.exit(f"Error: The file '{file_path}' was not found: {e}")
+    except json.JSONDecodeError as e:
+        sys.exit(f"Error: The file '{file_path}' is not a valid JSON file: {e}")
     except Exception as e:
         sys.exit(f"An unexpected error occurred: {e}")
-    return None
+
+###################################################################################################
+
+def load_json_file_to_str(file_path):
+    """
+    Load a JSON file into a string and handle exceptions.
+    
+    Parameters:
+    file_path (str): The path to the JSON file.
+    
+    Returns:
+    string: Loaded JSON file data string if successful, 
+    otherwise system exit.
+    """
+    try:
+        with open(file_path, 'r') as file:
+            data_str = file.read()
+        print(f"JSON file {file_path} loaded successfully.")
+        return data_str
+    except FileNotFoundError as e:
+        sys.exit(f"Error: The file '{file_path}' was not found: {e}")
+    except json.JSONDecodeError as e:
+        sys.exit(f"Error: The file '{file_path}' is not a valid JSON file: {e}")
+    except Exception as e:
+        sys.exit(f"An unexpected error occurred: {e}")
 
 ###################################################################################################
 
