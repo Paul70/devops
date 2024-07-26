@@ -8,11 +8,17 @@ from .utility import load_json_file_to_dict, detect_os_info
 # create the devops profile needed to create the conan profile
 
 class DevopsProfile:
-    user_presets_dict = None
+    user_presets = None
     profile_dict = None
 
     def __init__(self):
-        self.user_presets_dict = UserPresets() 
+        self.user_presets = UserPresets() 
+
+    def is_empty(self):
+        if self.user_presets.empty == True:
+            return True
+        else:
+            return False
 
 
     def create_devops_profile(self, cmake_bin_path = None):
@@ -22,10 +28,12 @@ class DevopsProfile:
         profile_template = parent_directory + "/resources/profile_template.json"
         
         self.profile_dict = load_json_file_to_dict(profile_template)
+        print(self.user_presets.get_build_settings())
 
-        settings_compiler = self.user_presets_dict.get_compiler_settings()
-        settings_build = self.user_presets_dict.get_build_settings()
-        settings_ide = self.user_presets_dict.get_ide_settings()
+        settings_compiler = self.user_presets.get_compiler_settings()
+        settings_build = self.user_presets.get_build_settings()
+        settings_ide = self.user_presets.get_ide_settings()
+        settings_conan = self.user_presets.get_conan_settings()
         settings_compiler_path = settings_compiler["path"]
 
         label = "devops-user-settings-profile"
@@ -39,7 +47,7 @@ class DevopsProfile:
         self.profile_dict["cmakeUserPresets"]["configurePresets"][0]["displayName"] = settings_ide["settings_display_name"]
         self.profile_dict["cmakeUserPresets"]["configurePresets"][0]["description"] = "User and platform specific project settings and configuration."
         self.profile_dict["cmakeUserPresets"]["configurePresets"][0]["cmakeExecutable"] = cmake_bin_path
-        self.profile_dict["cmakeUserPresets"]["configurePresets"][0]["inherits"] = "conan-debug"
+        self.profile_dict["cmakeUserPresets"]["configurePresets"][0]["inherits"] = "conan-debug" # fixed value
 
         # cmake cache variables
         self.profile_dict["cmakeUserPresets"]["configurePresets"][0]["cacheVariables"]["CMAKE_CXX_COMPILER"] = settings_compiler_path + "g++"
@@ -55,8 +63,8 @@ class DevopsProfile:
         self.profile_dict["cmakeUserPresets"]["buildPresets"][0]["jobs"] = settings_build["parallel_builds"]
 
         # conan profile section
-        self.profile_dict["conanProfile"]["name"] = "devops_conan_profile"
-        self.profile_dict["conanProfile"]["include"] = "default"
+        self.profile_dict["conanProfile"]["name"] = settings_conan["name"]
+        self.profile_dict["conanProfile"]["include"] = settings_conan["include_profile"]
         self.profile_dict["conanProfile"]["settings"]["build_type"] = settings_build["build_type"]
         self.profile_dict["conanProfile"]["settings"]["compiler"] = settings_compiler["name"]
         self.profile_dict["conanProfile"]["settings"]["compiler.cppstd"] = settings_compiler["cppstd"]
@@ -65,6 +73,7 @@ class DevopsProfile:
         self.profile_dict["conanProfile"]["conf"]["tools.build:jobs"] = settings_build["parallel_builds"]
         self.profile_dict["conanProfile"]["conf"]["tools.build:compiler_executables"] = f"{{'c': '{settings_compiler_path}gcc', 'cpp': '{settings_compiler_path}g++'}}"
 
+        # write the profile file.
         with open(f"devopsprofile.json", 'w') as json_file:
             json.dump(self.profile_dict, json_file, indent=4)
         pass

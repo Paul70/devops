@@ -6,9 +6,14 @@ import sys
 from .user_presets import UserPresets
 from .conan_importer import ConanImporter
 from .profile import DevopsProfile
-from .utility import remove_file, load_json_file, write_dict_to_json
+from .utility import remove_file, load_json_file_to_dict, write_dict_to_json
 
 class DevopsFile():
+    """
+    Private class attributes
+    """
+    __devops_profile__ = None
+
     """
     The base class for all user project configuration recipes
     """
@@ -24,42 +29,72 @@ class DevopsFile():
         pass
 
 
-    def get_devops_profile(self, cmake_bin = None):
-        profile = DevopsProfile()
-        profile.create_devops_profile(cmake_bin)
-        return profile
+
+    def __set_devops_profile__(self, cmake_bin = None):
+        self.__devops_profile__ = DevopsProfile()
+        if self.__devops_profile__.is_empty():
+            return False
+        else:
+            self.__devops_profile__.create_devops_profile(cmake_bin)
+            return True
     
 
-    def create_conan_profile(self):
-        # hier noch das default conan profile machen
-        devops_profile = self.get_devops_profile()
+
+    def __create_default_conan_profile__(self):
+        result = subprocess.run(["conan profile detect -f"], shell = True, capture_output = True, text = True)
+        if result.stderr:
+            print(result.stderr) # conan command output is written to stderr, just print the command output here
+        if not result.stdout:
+            sys.exit("devops.py: Error: Conan create default profile, leaving project configuration process.")
+        home_directory_user = os.path.expanduser("~")
+        return home_directory_user + "/.conan2/profiles/default"
+    
+
+
+    def __create_devops_conan_profile__(self):
+        assert self.__devops_profile__ != None
 
         # load devops profile
         home_directory_user = os.path.expanduser("~")
-        file = home_directory_user + "/.conan2/profiles/" + devops_profile.get_conan_profile_name()
+        user_conan_profile = self.__devops_profile__.get_conan_profile_name()
+
+        file = home_directory_user + "/.conan2/profiles/" + user_conan_profile
 
         conan_porfile = open(file, "w")
         conan_porfile.writelines("# This is an automatically generated file.\n \
                                   # Contents will be overwritten, do not edit manually.\n")
 
         # include section
-        conan_porfile.writelines("include("+ devops_profile.get_conan_profile_include() +")\n")
+        conan_porfile.writelines("include("+ self.__devops_profile__.get_conan_profile_include() +")\n")
+
+        # writing custom conan profile section
+        # if a devopsprofile setting field has no value, no conan entry will be written.
 
         # settings section
         conan_porfile.writelines("\n[settings]\n")
-        devops_conan_settings_dict = devops_profile.get_conan_profile_settings() 
+        devops_conan_settings_dict = self.__devops_profile__.get_conan_profile_settings() 
         for key, value in devops_conan_settings_dict.items():
-            conan_porfile.writelines(key+"="+str(value)+"\n")
+            if value:
+                conan_porfile.writelines(key+"="+str(value)+"\n")
 
 
         # conf section
         conan_porfile.writelines("\n[conf]\n")
-        devops_conan_conf_dict = devops_profile.get_conan_profile_conf() 
+        devops_conan_conf_dict = self.__devops_profile__.get_conan_profile_conf() 
         for key, value in devops_conan_conf_dict.items():
-            conan_porfile.writelines(key+"="+str(value)+"\n")
+            if value:
+                conan_porfile.writelines(key+"="+str(value)+"\n")
         
         conan_porfile.close()
-        self.conan_profile_path = file
+        return file
+    
+
+
+    def create_conan_profile(self):
+        if self.__set_devops_profile__():
+            self.conan_profile_path = self.__create_devops_conan_profile__()
+        else:
+            self.conan_profile_path = self.__create_default_conan_profile__()
 
         # Remove already existing CMakeUserPresets.json and CMakeLists.txt.user files since they
         # may cause trouble.
@@ -68,10 +103,13 @@ class DevopsFile():
         pass
 
 
+
     def conan_install(self):
+        assert self.conan_profile_path != None
+
         result = subprocess.run(["conan install . -pr "+self.conan_profile_path+" -f json --build missing"], shell = True, capture_output = True, text = True)
         if result.stderr:
-            print(result.stderr)
+            print(result.stderr) # conan command output is written to stderr, just print the command output here
         if not result.stdout:
             print("devops.py: Error: Conan install, leaving project configuration process.")
             return
@@ -79,29 +117,32 @@ class DevopsFile():
         self.build_dir = self.project_root + "/build/Debug/"
         self.conan_info_dir = self.build_dir + "conan_info/"
 
-        # grep conan info graph
+        # grep conan info graph, this is imprtant for extracting the cmake bin folder
         conan_info_graph_dict = json.loads(result.stdout)
         write_dict_to_json(conan_info_graph_dict, self.conan_info_dir + "info_graph.json")
         pass
 
 
+
     def create_cmake_user_presets(self):
+        if self.__devops_profile__.is_empty():
+            sys.exit("Cannot create a CMakeUserPresets.json with no DevopsUserPresets.json, leaving ...")
+
         cmake_bin = self.get_cmake_bin_from_conan_graph()
-        devops_profile = self.get_devops_profile(cmake_bin)
-        cmake_user_presets_devops = devops_profile.get_cmake_user_presets()
+        self.__set_devops_profile__(cmake_bin)
+        cmake_user_presets_devops = self.__devops_profile__.get_cmake_user_presets()
 
         print(self.project_root + "/CMakeUserPresets.json")
 
-        cmake_user_presets_conan = load_json_file(self.project_root + "/CMakeUserPresets.json")
-        print("hallo")
+        cmake_user_presets_conan = load_json_file_to_dict(self.project_root + "/CMakeUserPresets.json")
         cmake_user_presets_conan.update(cmake_user_presets_devops)
-        print("hallo")
         write_dict_to_json(cmake_user_presets_conan, self.project_root + "/CMakeUserPresets.json")
         pass
         
 
+
     def get_cmake_bin_from_conan_graph(self):
-        conan_info_graph_dict = load_json_file(self.conan_info_dir + "info_graph.json")
+        conan_info_graph_dict = load_json_file_to_dict(self.conan_info_dir + "info_graph.json")
         cmake_bin_path = None
         
         try:
@@ -117,18 +158,6 @@ class DevopsFile():
         
 
 
-
-
-    
-    
-    def bootstrap(self, args):
-        pass
-
-    def prepare(self):
-        pass
-
-    def build(self):
-        pass
 
 
     

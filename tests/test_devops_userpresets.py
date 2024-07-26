@@ -19,6 +19,10 @@ class TestUserPresets(unittest.TestCase):
             "settings_build": {
                 "parallel_builds": 4,
                 "target": "release"
+            },
+            "settings_conan": {
+                "name": "devops_conan_profile",
+                "include_profile": "default"
             }
         }
         self.json_string = json.dumps(self.mock_json_data)
@@ -78,6 +82,35 @@ class TestUserPresets(unittest.TestCase):
         build_settings = presets.get_build_settings()
         self.assertEqual(build_settings, self.mock_json_data["settings_build"])
 
+    @patch('os.getcwd', return_value='/mock/path')
+    @patch('builtins.open', new_callable=mock_open, read_data=json.dumps({
+        "settings_ide": {"theme": "dark", "font_size": 14},
+        "settings_compiler": {"optimization": "O2", "warnings": "all"},
+        "settings_build": {"parallel_builds": 4, "target": "release"},
+        "settings_conan": {"name": "devops_conan_profile","include_profile": "default"} 
+    }))
+    def test_get_conan_settings(self, mock_file, mock_getcwd):
+        # Instantiate UserPresets
+        presets = UserPresets()
+
+        # Test get_conan_settings method
+        conan_settings = presets.get_conan_settings()
+        self.assertEqual(conan_settings, self.mock_json_data["settings_conan"])
+
+    @patch('os.getcwd', return_value='/mock/path')
+    @patch('builtins.open', new_callable=mock_open, read_data=json.dumps({
+        "settings_ide": {"theme": "dark", "font_size": 14},
+        "settings_compiler": {"optimization": "O2", "warnings": "all"},
+        "settings_build": {"parallel_builds": 4, "target": "release"} 
+    }))
+    def test_get_conan_settings_key_does_not_exist(self, mock_file, mock_getcwd):
+        # Instantiate UserPresets
+        presets = UserPresets()
+
+        # Test get_conan_settings method
+        conan_settings = presets.get_conan_settings()
+        self.assertEqual(conan_settings["name"], "devops_conan_profile")
+        self.assertEqual(conan_settings["include_profile"], "default")
 
     # @patch('os.getcwd', return_value='/mock/path')
     # @patch('builtins.open', new_callable=mock_open, read_data=json.dumps({}))

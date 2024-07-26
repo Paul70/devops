@@ -89,16 +89,17 @@ def remove_file(file_path):
 
 ###################################################################################################
 
-def load_json_file_to_dict(file_path):
+def load_json_file_to_dict(file_path, exit = True):
     """
     Load a JSON file into a pyhton dictionary and handle exceptions.
     
     Parameters:
     file_path (str): The path to the JSON file.
+    exit (bool): flag to signal if method shall exit in case of exception
     
     Returns:
     dict: The loaded JSON data if successful, 
-    otherwise system exit.
+    otherwise system exit or re-throws exception.
     """
     try:
         with open(file_path, 'r') as file:
@@ -106,11 +107,20 @@ def load_json_file_to_dict(file_path):
         print(f"JSON file {file_path} loaded successfully.")
         return data
     except FileNotFoundError as e:
-        sys.exit(f"Error: The file '{file_path}' was not found: {e}")
+        if exit:
+            sys.exit(f"Error: The file '{file_path}' was not found: {e}")
+        else:
+            raise e
     except json.JSONDecodeError as e:
-        sys.exit(f"Error: The file '{file_path}' is not a valid JSON file: {e}")
+        if exit:
+            sys.exit(f"Error: The file '{file_path}' is not a valid JSON file: {e}")
+        else:
+            raise e
     except Exception as e:
-        sys.exit(f"An unexpected error occurred: {e}")
+        if exit:
+            sys.exit(f"An unexpected error occurred: {e}")
+        else:
+            raise e
 
 ###################################################################################################
 
