@@ -34,25 +34,25 @@ class TestDevopsProfile(unittest.TestCase):
         devops_profile = DevopsProfile()
 
         # Assertions for initialization
-        self.assertIsNotNone(devops_profile.user_presets_dict.get_compiler_settings())
-        compiler_settings_dict = devops_profile.user_presets_dict.get_compiler_settings()
+        self.assertIsNotNone(devops_profile.user_presets.get_compiler_settings())
+        compiler_settings_dict = devops_profile.user_presets.get_compiler_settings()
         self.assertEqual(compiler_settings_dict["path"], "/usr/bin/")
         self.assertEqual(compiler_settings_dict["major"], 9)
 
-        self.assertIsNotNone(devops_profile.user_presets_dict.get_build_settings())
-        build_settings_dict = devops_profile.user_presets_dict.get_build_settings()
+        self.assertIsNotNone(devops_profile.user_presets.get_build_settings())
+        build_settings_dict = devops_profile.user_presets.get_build_settings()
         self.assertEqual(build_settings_dict["parallel_builds"], 4)
         self.assertEqual(build_settings_dict["target"], "x86_64")
 
-        self.assertIsNotNone(devops_profile.user_presets_dict.get_ide_settings())
-        build_ide_dict = devops_profile.user_presets_dict.get_ide_settings()
+        self.assertIsNotNone(devops_profile.user_presets.get_ide_settings())
+        build_ide_dict = devops_profile.user_presets.get_ide_settings()
         self.assertEqual(build_ide_dict["name"], "VSCode")
         self.assertEqual(build_ide_dict["settings_display_name"], "Visual Studio Code")
 
-        self.assertIsNotNone(devops_profile.user_presets_dict)
+        self.assertIsNotNone(devops_profile.user_presets)
 
         # Attributes
-        self.assertIsNotNone(devops_profile.user_presets_dict)
+        self.assertIsNotNone(devops_profile.user_presets)
 
         # at this point, devops_profile.profile_dict has to be none since 
         # create_devops_profile() has not been called yet.
@@ -69,7 +69,6 @@ class TestDevopsProfile(unittest.TestCase):
             - creation of a DevopsProfile instance works, wich includes the creation of
               a UserPresets object instance.
             - all class attributes are initialized correctly.
-
         """
 
         # Mocked file content loaded during this test via built-in open() method
@@ -120,7 +119,7 @@ class TestDevopsProfile(unittest.TestCase):
             devops_profile = DevopsProfile()
 
             # Call create_devops_profile method
-            self.assertIsNotNone(devops_profile.user_presets_dict.get_compiler_settings())
+            self.assertIsNotNone(devops_profile.user_presets.get_compiler_settings())
             devops_profile.create_devops_profile()
 
              # Check that json.dump was called with the correct arguments

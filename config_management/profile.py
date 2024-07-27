@@ -12,7 +12,7 @@ class DevopsProfile:
     profile_dict = None
 
     def __init__(self):
-        self.user_presets = UserPresets() 
+        self.user_presets = UserPresets()
 
     def is_empty(self):
         if self.user_presets.empty == True:

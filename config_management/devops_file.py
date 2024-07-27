@@ -4,7 +4,6 @@ import subprocess
 import sys
 
 from .user_presets import UserPresets
-from .conan_importer import ConanImporter
 from .profile import DevopsProfile
 from .utility import remove_file, load_json_file_to_dict, write_dict_to_json
 
@@ -12,10 +11,13 @@ class DevopsFile():
     """
     Private class attributes
     """
+    __has_devops_profile__ = False
     __devops_profile__ = None
 
     """
     The base class for all user project configuration recipes
+    Use of conan impoerter is only possible after running conan create or conan install command:
+    conanImport = ConanImporter()
     """
     project_root = None
     conan_profile_path = None
@@ -23,9 +25,7 @@ class DevopsFile():
     conan_info_dir = None
 
     def __init__(self):
-        self.devopsUserPresets = UserPresets()
-        # need conan create or conan install command before
-        #self.conanImport = ConanImporter() # hier liegt der Hase im Pfeffer
+        self.__has_devops_profile__ = self.__set_devops_profile__()
         pass
 
 
@@ -91,7 +91,7 @@ class DevopsFile():
 
 
     def create_conan_profile(self):
-        if self.__set_devops_profile__():
+        if self.__has_devops_profile__:
             self.conan_profile_path = self.__create_devops_conan_profile__()
         else:
             self.conan_profile_path = self.__create_default_conan_profile__()
